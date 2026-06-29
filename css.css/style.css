@@ -1,0 +1,136 @@
+body{
+margin:0;
+font-family:Orbitron;
+background:#0f172a;
+color:white;
+text-align:center;
+}
+
+.container{
+display:flex;
+justify-content:center;
+flex-wrap:wrap;
+gap:10px;
+margin-top:40px;
+}
+
+/* ✅ ENTRY ANIMATION */
+.node{
+width:70px;
+height:70px;
+background:cyan;
+color:black;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:10px;
+
+/* IMPORTANT */
+opacity:0;
+transform:translateY(-40px) scale(0.5);
+
+animation:enter 0.5s forwards;
+}
+
+@keyframes enter{
+to{
+opacity:1;
+transform:translateY(0) scale(1);
+}
+}
+
+/* ✅ EXIT ANIMATION */
+.node.exit{
+animation:exit 0.4s forwards;
+}
+
+@keyframes exit{
+to{
+opacity:0;
+transform:translateY(40px) scale(0);
+}
+}
+body{
+margin:0;
+background:#0f172a;
+font-family:Orbitron,sans-serif;
+color:white;
+text-align:center;
+overflow:hidden;
+}
+
+.array-container{
+display:flex;
+justify-content:center;
+gap:15px;
+margin-top:80px;
+perspective:1000px;
+}
+
+.box{
+width:80px;
+height:80px;
+background:linear-gradient(135deg,#00ffff,#0099ff);
+border-radius:15px;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+font-size:22px;
+font-weight:bold;
+color:black;
+
+transform-style:preserve-3d;
+
+box-shadow:
+0 0 15px cyan,
+0 0 30px cyan;
+
+animation:insert3D .8s ease forwards;
+}
+
+@keyframes insert3D{
+
+0%{
+opacity:0;
+transform:
+translateY(-300px)
+rotateX(360deg)
+scale(.2);
+}
+
+100%{
+opacity:1;
+transform:
+translateY(0)
+rotateX(0deg)
+scale(1);
+}
+}
+
+.delete{
+animation:delete3D .8s forwards;
+}
+
+@keyframes delete3D{
+
+0%{
+opacity:1;
+}
+
+100%{
+opacity:0;
+transform:
+translateY(200px)
+rotateY(720deg)
+scale(0);
+}
+}
+
+.box:hover{
+transform:
+rotateY(25deg)
+rotateX(15deg)
+scale(1.15);
+}

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Graph Full Operations</title>
+
+<style>
+
+body{
+margin:0;
+background:#0f172a;
+color:white;
+font-family:Arial;
+text-align:center;
+overflow:hidden;
+}
+
+canvas{
+position:absolute;
+top:0;
+left:0;
+pointer-events:none;
+}
+
+input{
+padding:8px;
+margin:5px;
+border-radius:6px;
+border:none;
+}
+
+button{
+padding:10px;
+margin:5px;
+background:cyan;
+border:none;
+border-radius:6px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.node{
+width:60px;
+height:60px;
+border-radius:50%;
+background:cyan;
+color:black;
+display:flex;
+align-items:center;
+justify-content:center;
+position:absolute;
+font-weight:bold;
+box-shadow:0 0 10px cyan;
+}
+
+.visited{
+background:lime !important;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>GRAPH OPERATIONS VISUALIZER</h2>
+
+<!-- NODE INPUT -->
+<input id="nodeVal" placeholder="Node">
+<button onclick="addNode()">Add Node</button>
+<button onclick="deleteNode()">Delete Node</button>
+
+<br>
+
+<!-- EDGE INPUT -->
+<input id="edgeVal" placeholder="Edge: A B">
+<button onclick="addEdge()">Add Edge</button>
+<button onclick="deleteEdge()">Delete Edge</button>
+
+<br>
+
+<button onclick="bfs()">BFS</button>
+<button onclick="dfs()">DFS</button>
+<button onclick="resetGraph()">Reset</button>
+
+<canvas id="canvas"></canvas>
+
+<script>
+
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let nodes=[];
+let edges=[];
+
+/* ================= ADD NODE ================= */
+function addNode(){
+
+let val=document.getElementById("nodeVal").value.trim();
+if(val==="") return;
+
+if(nodes.find(n=>n.id===val)){
+alert("Node exists!");
+return;
+}
+
+let el=document.createElement("div");
+el.className="node";
+el.innerText=val;
+
+let node={
+id:val,
+x:100+Math.random()*600,
+y:100+Math.random()*300,
+el
+};
+
+el.style.left=node.x+"px";
+el.style.top=node.y+"px";
+
+document.body.appendChild(el);
+nodes.push(node);
+
+drag(node);
+
+document.getElementById("nodeVal").value="";
+draw();
+}
+
+/* ================= DELETE NODE ================= */
+function deleteNode(){
+
+let val=document.getElementById("nodeVal").value.trim();
+if(val==="") return;
+
+nodes=nodes.filter(n=>n.id!==val);
+
+document.querySelectorAll(".node").forEach(n=>{
+if(n.innerText===val) n.remove();
+});
+
+edges=edges.filter(e=>e[0]!==val && e[1]!==val);
+
+draw();
+}
+
+/* ================= ADD EDGE ================= */
+function addEdge(){
+
+let val=document.getElementById("edgeVal").value.trim();
+let [a,b]=val.split(" ");
+
+if(!a || !b) return;
+
+if(!nodes.find(n=>n.id===a) || !nodes.find(n=>n.id===b)){
+alert("Invalid nodes");
+return;
+}
+
+edges.push([a,b]);
+draw();
+
+document.getElementById("edgeVal").value="";
+}
+
+/* ================= DELETE EDGE ================= */
+function deleteEdge(){
+
+let val=document.getElementById("edgeVal").value.trim();
+let [a,b]=val.split(" ");
+
+edges=edges.filter(e=>
+!(e[0]===a && e[1]===b) &&
+!(e[0]===b && e[1]===a)
+);
+
+draw();
+
+document.getElementById("edgeVal").value="";
+}
+
+/* ================= DRAW ================= */
+function draw(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+edges.forEach(e=>{
+
+let a=nodes.find(n=>n.id===e[0]);
+let b=nodes.find(n=>n.id===e[1]);
+
+if(!a || !b) return;
+
+ctx.beginPath();
+ctx.moveTo(a.x+30,a.y+30);
+ctx.lineTo(b.x+30,b.y+30);
+
+ctx.strokeStyle="cyan";
+ctx.lineWidth=3;
+ctx.stroke();
+
+});
+
+}
+
+/* ================= BFS ================= */
+async function bfs(){
+
+if(nodes.length===0) return;
+
+clearColors();
+
+let visited=new Set();
+let q=[nodes[0]];
+
+while(q.length){
+
+let cur=q.shift();
+
+if(visited.has(cur.id)) continue;
+
+visited.add(cur.id);
+cur.el.classList.add("visited");
+
+await wait(500);
+
+edges.forEach(e=>{
+if(e[0]===cur.id){
+let next=nodes.find(n=>n.id===e[1]);
+if(next && !visited.has(next.id)) q.push(next);
+}
+});
+
+}
+
+}
+
+/* ================= DFS ================= */
+async function dfs(){
+
+if(nodes.length===0) return;
+
+clearColors();
+
+let visited=new Set();
+
+async function visit(node){
+
+visited.add(node.id);
+node.el.classList.add("visited");
+
+await wait(500);
+
+for(let e of edges){
+if(e[0]===node.id){
+let next=nodes.find(n=>n.id===e[1]);
+if(next && !visited.has(next.id)){
+await visit(next);
+}
+}
+}
+
+}
+
+await visit(nodes[0]);
+
+}
+
+/* ================= RESET ================= */
+function resetGraph(){
+
+nodes=[];
+edges=[];
+
+document.querySelectorAll(".node").forEach(n=>n.remove());
+
+draw();
+
+}
+
+/* ================= CLEAR COLORS ================= */
+function clearColors(){
+nodes.forEach(n=>{
+n.el.classList.remove("visited");
+});
+}
+
+/* ================= DRAG ================= */
+function drag(node){
+
+let dragging=false;
+
+node.el.onmousedown=()=>dragging=true;
+
+document.onmousemove=(e)=>{
+
+if(!dragging) return;
+
+node.x=e.clientX;
+node.y=e.clientY;
+
+node.el.style.left=node.x+"px";
+node.el.style.top=node.y+"px";
+
+draw();
+
+};
+
+document.onmouseup=()=>dragging=false;
+
+}
+
+/* ================= UTIL ================= */
+function wait(ms){
+return new Promise(r=>setTimeout(r,ms));
+}
+
+/* ================= RESIZE ================= */
+window.onresize=()=>{
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+draw();
+};
+
+</script>
+
+</body>
+</html>

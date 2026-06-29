@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Heap Visualizer Pro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+
+<style>
+
+/* ===== GLOBAL ===== */
+body{
+margin:0;
+font-family:Orbitron;
+background:#0f172a;
+color:white;
+overflow:hidden;
+text-align:center;
+}
+
+/* glow background */
+body::before{
+content:"";
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:
+radial-gradient(circle at 20% 20%, cyan, transparent 25%),
+radial-gradient(circle at 80% 30%, violet, transparent 25%),
+radial-gradient(circle at 40% 80%, blue, transparent 25%);
+filter:blur(80px);
+opacity:0.5;
+animation:bg 8s infinite alternate;
+z-index:-1;
+}
+
+@keyframes bg{
+0%{transform:scale(1);}
+100%{transform:scale(1.3);}
+}
+
+/* title */
+h1{
+margin:10px;
+text-shadow:0 0 20px cyan;
+}
+
+/* buttons */
+button{
+padding:10px;
+margin:5px;
+background:cyan;
+border:none;
+border-radius:8px;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{
+transform:scale(1.05);
+box-shadow:0 0 15px cyan;
+}
+
+/* container */
+.container{
+display:flex;
+flex-direction:column;
+align-items:center;
+margin-top:20px;
+}
+
+/* HEAP ARRAY */
+.array{
+display:flex;
+gap:10px;
+margin:20px;
+}
+
+/* NODE */
+.node{
+width:60px;
+height:60px;
+background:linear-gradient(135deg,#00ffff,#0066ff);
+border-radius:10px;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-weight:bold;
+color:black;
+
+box-shadow:0 0 15px cyan;
+
+transition:0.3s;
+}
+
+.highlight{
+background:yellow !important;
+transform:scale(1.2);
+box-shadow:0 0 25px yellow;
+}
+
+/* TREE VIEW */
+.tree{
+margin-top:30px;
+position:relative;
+height:300px;
+width:100%;
+}
+
+.tree-node{
+position:absolute;
+width:55px;
+height:55px;
+border-radius:50%;
+background:linear-gradient(135deg,#00ffff,#0066ff);
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+box-shadow:0 0 15px cyan;
+
+font-weight:bold;
+color:black;
+transition:0.3s;
+}
+
+.line{
+position:absolute;
+height:2px;
+background:cyan;
+transform-origin:left;
+}
+
+/* canvas particles */
+canvas{
+position:fixed;
+top:0;
+left:0;
+z-index:-2;
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="particles"></canvas>
+
+<h1>HEAP VISUALIZER (MAX HEAP PRO)</h1>
+
+<input id="val" placeholder="Enter value">
+
+<button onclick="insert()">Insert</button>
+<button onclick="removeRoot()">Delete Root</button>
+
+<div class="container">
+
+<div class="array" id="array"></div>
+
+<div class="tree" id="tree"></div>
+
+</div>
+
+<script>
+
+let heap=[];
+
+/* ================= RENDER ================= */
+function render(){
+renderArray();
+renderTree();
+}
+
+/* ---------- ARRAY VIEW ---------- */
+function renderArray(){
+
+let box=document.getElementById("array");
+box.innerHTML="";
+
+heap.forEach(v=>{
+let d=document.createElement("div");
+d.className="node";
+d.innerText=v;
+box.appendChild(d);
+});
+}
+
+/* ---------- TREE VIEW ---------- */
+function renderTree(){
+
+let tree=document.getElementById("tree");
+tree.innerHTML="";
+
+for(let i=0;i<heap.length;i++){
+
+let x=window.innerWidth/2 + (i*60 - heap.length*30);
+let y=50 + Math.floor(Math.log2(i+1))*80;
+
+let node=document.createElement("div");
+node.className="tree-node";
+node.innerText=heap[i];
+
+node.style.left=x+"px";
+node.style.top=y+"px";
+
+tree.appendChild(node);
+
+/* draw parent link */
+if(i>0){
+let parent=Math.floor((i-1)/2);
+
+let px=window.innerWidth/2 + (parent*60 - heap.length*30);
+let py=50 + Math.floor(Math.log2(parent+1))*80;
+
+let line=document.createElement("div");
+line.className="line";
+
+let dx=x-px;
+let dy=y-py;
+
+line.style.width=Math.sqrt(dx*dx+dy*dy)+"px";
+line.style.left=px+25+"px";
+line.style.top=py+25+"px";
+line.style.transform=`rotate(${Math.atan2(dy,dx)}rad)`;
+
+tree.appendChild(line);
+}
+
+}
+
+}
+
+/* ================= INSERT ================= */
+async function insert(){
+
+let val=Number(document.getElementById("val").value);
+if(!val) return;
+
+heap.push(val);
+await heapifyUp(heap.length-1);
+render();
+}
+
+/* heapify up */
+async function heapifyUp(i){
+
+while(i>0){
+
+let parent=Math.floor((i-1)/2);
+
+if(heap[parent] < heap[i]){
+
+[heap[parent],heap[i]]=[heap[i],heap[parent]];
+
+i=parent;
+render();
+await wait(400);
+
+}else break;
+
+}
+
+}
+
+/* ================= DELETE ROOT ================= */
+async function removeRoot(){
+
+if(heap.length===0) return;
+
+heap[0]=heap[heap.length-1];
+heap.pop();
+
+await heapifyDown(0);
+render();
+}
+
+/* heapify down */
+async function heapifyDown(i){
+
+let n=heap.length;
+
+while(true){
+
+let largest=i;
+let l=2*i+1;
+let r=2*i+2;
+
+if(l<n && heap[l]>heap[largest]) largest=l;
+if(r<n && heap[r]>heap[largest]) largest=r;
+
+if(largest!==i){
+
+[heap[i],heap[largest]]=[heap[largest],heap[i]];
+
+i=largest;
+render();
+await wait(400);
+
+}else break;
+
+}
+
+}
+
+/* ================= UTIL ================= */
+function wait(ms){
+return new Promise(r=>setTimeout(r,ms));
+}
+
+/* ================= PARTICLES ================= */
+const canvas=document.getElementById("particles");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let particles=[];
+
+for(let i=0;i<80;i++){
+particles.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+r:Math.random()*2,
+dx:(Math.random()-0.5)*1,
+dy:(Math.random()-0.5)*1
+});
+}
+
+function animate(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+particles.forEach(p=>{
+p.x+=p.dx;
+p.y+=p.dy;
+
+if(p.x<0||p.x>canvas.width)p.dx*=-1;
+if(p.y<0||p.y>canvas.height)p.dy*=-1;
+
+ctx.beginPath();
+ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+ctx.fillStyle="cyan";
+ctx.fill();
+});
+
+requestAnimationFrame(animate);
+}
+
+animate();
+
+</script>
+
+</body>
+</html>

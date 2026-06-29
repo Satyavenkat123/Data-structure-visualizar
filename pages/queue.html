@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Queue Visualizer Pro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+
+/* ===== GLOBAL ===== */
+body{
+margin:0;
+font-family:'Orbitron',sans-serif;
+background:#0f172a;
+overflow:hidden;
+color:white;
+text-align:center;
+}
+
+/* glowing background */
+body::before{
+content:"";
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:
+radial-gradient(circle at 20% 20%, lime, transparent 25%),
+radial-gradient(circle at 80% 30%, cyan, transparent 25%),
+radial-gradient(circle at 40% 80%, blue, transparent 25%);
+filter:blur(80px);
+opacity:0.5;
+animation:bg 8s infinite alternate;
+z-index:-1;
+}
+
+@keyframes bg{
+0%{transform:scale(1);}
+100%{transform:scale(1.3);}
+}
+
+/* TITLE */
+h1{
+margin-top:20px;
+text-shadow:0 0 20px lime;
+}
+
+/* INPUT */
+input{
+padding:10px;
+border:none;
+border-radius:8px;
+margin:5px;
+}
+
+/* BUTTONS */
+button{
+padding:10px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+background:lime;
+font-weight:bold;
+transition:0.3s;
+}
+
+button:hover{
+transform:scale(1.1);
+box-shadow:0 0 15px lime;
+}
+
+/* QUEUE CONTAINER */
+.container{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:12px;
+margin-top:60px;
+perspective:1200px;
+}
+
+/* NODE */
+.node{
+width:80px;
+height:80px;
+background:linear-gradient(135deg,#39ff14,#00ffff);
+border-radius:12px;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-weight:bold;
+color:black;
+font-size:18px;
+
+box-shadow:0 0 20px lime;
+
+/* entry animation */
+animation:enter 0.5s ease;
+transition:0.4s;
+}
+
+@keyframes enter{
+0%{
+opacity:0;
+transform:translateX(200px) rotateY(360deg) scale(0.3);
+}
+100%{
+opacity:1;
+transform:translateX(0) rotateY(0) scale(1);
+}
+}
+
+/* EXIT ANIMATION */
+.exit{
+animation:exit 0.5s forwards;
+}
+
+@keyframes exit{
+100%{
+opacity:0;
+transform:translateX(-200px) rotateY(-360deg) scale(0);
+}
+}
+
+/* FRONT / REAR HIGHLIGHT */
+.front{
+background:yellow !important;
+box-shadow:0 0 25px yellow;
+transform:scale(1.2);
+}
+
+.rear{
+background:orange !important;
+box-shadow:0 0 25px orange;
+transform:scale(1.2);
+}
+
+/* PARTICLES */
+canvas{
+position:fixed;
+top:0;
+left:0;
+z-index:-2;
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="particles"></canvas>
+
+<h1>QUEUE VISUALIZER (PRO LEVEL)</h1>
+
+<input id="val" placeholder="Enter value">
+<button onclick="enqueue()">Enqueue</button>
+<button onclick="dequeue()">Dequeue</button>
+<button onclick="showFront()">Front</button>
+<button onclick="showRear()">Rear</button>
+
+<div class="container" id="box"></div>
+
+<script>
+
+/* ===== QUEUE ===== */
+let queue=[];
+
+/* ===== RENDER ===== */
+function render(){
+let box=document.getElementById("box");
+box.innerHTML="";
+
+queue.forEach(v=>{
+let div=document.createElement("div");
+div.className="node";
+div.innerText=v;
+box.appendChild(div);
+});
+}
+
+/* ===== ENQUEUE ===== */
+function enqueue(){
+let v=document.getElementById("val").value;
+if(v==="") return;
+
+queue.push(v);
+render();
+}
+
+/* ===== DEQUEUE WITH ANIMATION ===== */
+function dequeue(){
+
+let nodes=document.querySelectorAll(".node");
+if(nodes.length===0) return;
+
+let first=nodes[0];
+first.classList.add("exit");
+
+setTimeout(()=>{
+queue.shift();
+render();
+},500);
+}
+
+/* ===== FRONT HIGHLIGHT ===== */
+function showFront(){
+let nodes=document.querySelectorAll(".node");
+
+nodes.forEach(n=>{
+n.classList.remove("front","rear");
+});
+
+if(nodes.length>0){
+nodes[0].classList.add("front");
+}
+}
+
+/* ===== REAR HIGHLIGHT ===== */
+function showRear(){
+let nodes=document.querySelectorAll(".node");
+
+nodes.forEach(n=>{
+n.classList.remove("front","rear");
+});
+
+if(nodes.length>0){
+nodes[nodes.length-1].classList.add("rear");
+}
+}
+
+/* ===== PARTICLES ===== */
+const canvas=document.getElementById("particles");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let particles=[];
+
+for(let i=0;i<70;i++){
+particles.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+r:Math.random()*2,
+dx:(Math.random()-0.5)*1,
+dy:(Math.random()-0.5)*1
+});
+}
+
+function animateParticles(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+particles.forEach(p=>{
+p.x+=p.dx;
+p.y+=p.dy;
+
+if(p.x<0||p.x>canvas.width)p.dx*=-1;
+if(p.y<0||p.y>canvas.height)p.dy*=-1;
+
+ctx.beginPath();
+ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+ctx.fillStyle="lime";
+ctx.fill();
+});
+
+requestAnimationFrame(animateParticles);
+}
+
+animateParticles();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Linear Data Structures</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+
+/* RESET */
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Orbitron',sans-serif;
+}
+
+body{
+height:100vh;
+overflow:hidden;
+
+/* Animated gradient background */
+background:linear-gradient(-45deg,#0f0c29,#302b63,#24243e,#00c6ff,#0072ff);
+background-size:400% 400%;
+animation:bgMove 10s ease infinite;
+
+display:flex;
+justify-content:center;
+align-items:center;
+position:relative;
+}
+
+@keyframes bgMove{
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
+}
+
+/* FLOATING ORBS */
+.orb{
+position:absolute;
+border-radius:50%;
+background:rgba(0,255,255,0.15);
+backdrop-filter:blur(10px);
+animation:float 8s infinite ease-in-out;
+}
+
+.orb:nth-child(1){
+width:200px;height:200px;
+top:10%;left:5%;
+}
+
+.orb:nth-child(2){
+width:150px;height:150px;
+bottom:10%;right:10%;
+}
+
+.orb:nth-child(3){
+width:100px;height:100px;
+top:20%;right:20%;
+}
+
+@keyframes float{
+0%,100%{transform:translateY(0);}
+50%{transform:translateY(-40px);}
+}
+
+/* MAIN CONTAINER */
+.container{
+text-align:center;
+z-index:2;
+}
+
+/* TITLE */
+h1{
+font-size:4rem;
+color:white;
+text-shadow:0 0 10px cyan,0 0 20px cyan,0 0 40px cyan;
+animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+from{opacity:0.6; transform:scale(1);}
+to{opacity:1; transform:scale(1.05);}
+}
+
+/* SUBTITLE typing animation */
+.subtitle{
+margin-top:15px;
+color:#dbeafe;
+font-size:1.2rem;
+overflow:hidden;
+white-space:nowrap;
+border-right:3px solid white;
+width:0;
+animation:typing 4s steps(40,end) forwards,blink .8s infinite;
+}
+
+@keyframes typing{
+from{width:0;}
+to{width:100%;}
+}
+
+@keyframes blink{
+50%{border-color:transparent;}
+}
+
+/* CARDS */
+.cards{
+margin-top:60px;
+display:flex;
+gap:40px;
+justify-content:center;
+flex-wrap:wrap;
+}
+
+/* CARD DESIGN */
+.card{
+width:250px;
+height:180px;
+background:rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.2);
+backdrop-filter:blur(15px);
+border-radius:25px;
+
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+
+text-decoration:none;
+color:white;
+
+transition:0.5s;
+position:relative;
+overflow:hidden;
+
+animation:floatCard 4s infinite ease-in-out;
+}
+
+/* FLOAT CARDS */
+@keyframes floatCard{
+0%{transform:translateY(0);}
+50%{transform:translateY(-15px);}
+100%{transform:translateY(0);}
+}
+
+/* HOVER EFFECT */
+.card:hover{
+transform:scale(1.1) rotate(2deg);
+box-shadow:0 0 20px cyan,0 0 40px blue;
+}
+
+/* SHINE EFFECT */
+.card::before{
+content:"";
+position:absolute;
+width:200%;
+height:200%;
+background:linear-gradient(120deg,transparent,rgba(255,255,255,0.4),transparent);
+top:-50%;
+left:-120%;
+transform:rotate(25deg);
+transition:0.8s;
+}
+
+.card:hover::before{
+left:120%;
+}
+
+/* ICON */
+.icon{
+font-size:3rem;
+margin-bottom:10px;
+animation:bounce 2s infinite;
+}
+
+@keyframes bounce{
+0%,100%{transform:translateY(0);}
+50%{transform:translateY(-10px);}
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- FLOATING ORBS -->
+<div class="orb"></div>
+<div class="orb"></div>
+<div class="orb"></div>
+
+<div class="container">
+
+<h1>LINEAR DATA STRUCTURES</h1>
+
+<p class="subtitle">
+Array • Stack • Queue • Linked List • Deque
+</p>
+
+<div class="cards">
+
+<a href="pages/array.html" class="card">
+<div class="icon">📦</div>
+<h2>Array</h2>
+</a>
+
+<a href="pages/stack.html" class="card">
+<div class="icon">📚</div>
+<h2>Stack</h2>
+</a>
+
+<a href="pages/queue.html" class="card">
+<div class="icon">🚶</div>
+<h2>Queue</h2>
+</a>
+
+<a href="#" class="card">
+<div class="icon">🔗</div>
+<h2>Linked List</h2>
+</a>
+
+</div>
+
+</div>
+
+</body>
+</html>

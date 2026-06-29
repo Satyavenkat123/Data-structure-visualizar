@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Searching Visualizer Pro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+
+/* ===== GLOBAL ===== */
+body{
+margin:0;
+font-family:'Orbitron',sans-serif;
+background:#0f172a;
+overflow:hidden;
+color:white;
+text-align:center;
+}
+
+/* glowing background */
+body::before{
+content:"";
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:
+radial-gradient(circle at 20% 20%, cyan, transparent 25%),
+radial-gradient(circle at 80% 30%, violet, transparent 25%),
+radial-gradient(circle at 40% 80%, blue, transparent 25%);
+filter:blur(80px);
+opacity:0.5;
+animation:bg 8s infinite alternate;
+z-index:-1;
+}
+
+@keyframes bg{
+0%{transform:scale(1);}
+100%{transform:scale(1.3);}
+}
+
+/* TITLE */
+h1{
+margin-top:20px;
+text-shadow:0 0 20px cyan;
+}
+
+/* INPUT */
+input{
+padding:10px;
+border:none;
+border-radius:8px;
+margin:5px;
+}
+
+/* BUTTONS */
+button{
+padding:10px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+background:cyan;
+font-weight:bold;
+transition:0.3s;
+}
+
+button:hover{
+transform:scale(1.1);
+box-shadow:0 0 15px cyan;
+}
+
+/* ARRAY CONTAINER */
+.container{
+display:flex;
+justify-content:center;
+flex-wrap:wrap;
+gap:12px;
+margin-top:60px;
+perspective:1200px;
+}
+
+/* NODE */
+.node{
+width:75px;
+height:75px;
+background:linear-gradient(135deg,#00ffff,#0066ff);
+border-radius:12px;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-weight:bold;
+color:black;
+font-size:18px;
+
+box-shadow:0 0 20px cyan;
+
+transition:0.4s;
+transform-style:preserve-3d;
+}
+
+/* STEP HIGHLIGHT */
+.active{
+background:yellow !important;
+transform:scale(1.3) rotateY(20deg);
+box-shadow:0 0 25px yellow;
+}
+
+/* FOUND */
+.found{
+background:lime !important;
+transform:scale(1.4) rotateY(360deg);
+box-shadow:0 0 30px lime;
+}
+
+/* NOT FOUND FLASH */
+.notfound{
+background:red !important;
+transform:scale(1.2);
+box-shadow:0 0 20px red;
+}
+
+/* PARTICLES */
+canvas{
+position:fixed;
+top:0;
+left:0;
+z-index:-2;
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="particles"></canvas>
+
+<h1>SEARCHING VISUALIZER (PRO LEVEL)</h1>
+
+<input id="size" placeholder="Array (comma separated)">
+<input id="val" placeholder="Search value">
+
+<button onclick="create()">Create Array</button>
+<button onclick="linearSearch()">Linear Search</button>
+<button onclick="binarySearch()">Binary Search</button>
+
+<div class="container" id="box"></div>
+
+<script>
+
+/* ===== DATA ===== */
+let arr=[];
+
+/* ===== CREATE ARRAY ===== */
+function create(){
+
+let input=document.getElementById("size").value;
+
+arr=input.split(",").map(x=>x.trim());
+
+render();
+}
+
+/* ===== RENDER ===== */
+function render(){
+
+let box=document.getElementById("box");
+box.innerHTML="";
+
+arr.forEach(v=>{
+let div=document.createElement("div");
+div.className="node";
+div.innerText=v;
+box.appendChild(div);
+});
+}
+
+/* ===== LINEAR SEARCH ===== */
+async function linearSearch(){
+
+let value=document.getElementById("val").value;
+let nodes=document.querySelectorAll(".node");
+
+for(let i=0;i<nodes.length;i++){
+
+nodes[i].classList.add("active");
+
+await delay(500);
+
+if(nodes[i].innerText==value){
+
+nodes[i].classList.remove("active");
+nodes[i].classList.add("found");
+return;
+}
+
+nodes[i].classList.remove("active");
+}
+
+for(let n of nodes){
+n.classList.add("notfound");
+}
+
+}
+
+/* ===== BINARY SEARCH (SORT FIRST) ===== */
+async function binarySearch(){
+
+let value=Number(document.getElementById("val").value);
+
+arr.sort((a,b)=>a-b);
+render();
+
+let nodes=document.querySelectorAll(".node");
+
+let low=0,high=nodes.length-1;
+
+while(low<=high){
+
+let mid=Math.floor((low+high)/2);
+
+nodes[mid].classList.add("active");
+
+await delay(600);
+
+if(Number(nodes[mid].innerText)==value){
+
+nodes[mid].classList.remove("active");
+nodes[mid].classList.add("found");
+return;
+}
+else if(Number(nodes[mid].innerText)<value){
+low=mid+1;
+}
+else{
+high=mid-1;
+}
+
+nodes[mid].classList.remove("active");
+}
+
+for(let n of nodes){
+n.classList.add("notfound");
+}
+
+}
+
+/* ===== DELAY ===== */
+function delay(ms){
+return new Promise(r=>setTimeout(r,ms));
+}
+
+/* ===== PARTICLES ===== */
+const canvas=document.getElementById("particles");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let particles=[];
+
+for(let i=0;i<70;i++){
+particles.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+r:Math.random()*2,
+dx:(Math.random()-0.5)*1,
+dy:(Math.random()-0.5)*1
+});
+}
+
+function animate(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+particles.forEach(p=>{
+p.x+=p.dx;
+p.y+=p.dy;
+
+if(p.x<0||p.x>canvas.width)p.dx*=-1;
+if(p.y<0||p.y>canvas.height)p.dy*=-1;
+
+ctx.beginPath();
+ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+ctx.fillStyle="cyan";
+ctx.fill();
+});
+
+requestAnimationFrame(animate);
+}
+
+animate();
+
+</script>
+
+</body>
+</html>

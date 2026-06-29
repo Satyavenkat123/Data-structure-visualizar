@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tree Visualizer</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Orbitron',sans-serif;
+}
+
+body{
+height:100vh;
+overflow:hidden;
+background:linear-gradient(-45deg,#020617,#0f172a,#1e1b4b,#0c4a6e);
+background-size:400% 400%;
+animation:bgMove 12s ease infinite;
+color:white;
+}
+
+@keyframes bgMove{
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
+}
+
+.container{
+padding:20px;
+text-align:center;
+}
+
+h1{
+margin-bottom:20px;
+text-shadow:0 0 15px cyan;
+}
+
+.controls{
+margin-bottom:20px;
+}
+
+input{
+padding:12px;
+border:none;
+border-radius:10px;
+outline:none;
+width:180px;
+}
+
+button{
+padding:12px 18px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+margin:5px;
+background:cyan;
+font-weight:bold;
+transition:.3s;
+}
+
+button:hover{
+transform:scale(1.08);
+box-shadow:0 0 15px cyan;
+}
+
+.tree{
+display:flex;
+justify-content:center;
+margin-top:30px;
+overflow:auto;
+height:70vh;
+}
+
+ul{
+padding-top:20px;
+position:relative;
+transition:.5s;
+}
+
+ul ul::before{
+content:'';
+position:absolute;
+top:0;
+left:50%;
+border-left:2px solid cyan;
+width:0;
+height:20px;
+}
+
+li{
+float:left;
+text-align:center;
+list-style:none;
+position:relative;
+padding:20px 5px 0 5px;
+}
+
+li::before,
+li::after{
+content:'';
+position:absolute;
+top:0;
+right:50%;
+border-top:2px solid cyan;
+width:50%;
+height:20px;
+}
+
+li::after{
+right:auto;
+left:50%;
+border-left:2px solid cyan;
+}
+
+li:only-child::after,
+li:only-child::before{
+display:none;
+}
+
+li:first-child::before{
+border:none;
+}
+
+li:last-child::after{
+border:none;
+}
+
+.node{
+width:70px;
+height:70px;
+
+background:rgba(255,255,255,.1);
+backdrop-filter:blur(15px);
+
+border:1px solid rgba(255,255,255,.2);
+border-radius:50%;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+font-weight:bold;
+
+animation:nodeEnter .8s ease;
+}
+
+@keyframes nodeEnter{
+0%{
+opacity:0;
+transform:translateY(-150px) scale(.2);
+}
+100%{
+opacity:1;
+transform:translateY(0) scale(1);
+}
+}
+
+.highlight{
+background:yellow !important;
+color:black;
+box-shadow:0 0 20px yellow;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>TREE VISUALIZER</h1>
+
+<div class="controls">
+
+<input id="value" placeholder="Enter Value">
+
+<button onclick="insertNode()">Insert</button>
+<button onclick="searchNode()">Search</button>
+<button onclick="levelOrder()">Traversal</button>
+
+</div>
+
+<div class="tree" id="treeArea"></div>
+
+</div>
+
+<script>
+
+class Node{
+constructor(data){
+this.data=data;
+this.left=null;
+this.right=null;
+}
+}
+
+let root=null;
+
+function insert(root,value){
+
+if(root===null)
+return new Node(value);
+
+if(value<root.data)
+root.left=insert(root.left,value);
+
+else
+root.right=insert(root.right,value);
+
+return root;
+}
+
+function insertNode(){
+
+let value=
+document.getElementById("value").value;
+
+if(value==="") return;
+
+root=insert(root,Number(value));
+
+renderTree();
+}
+
+function createTreeHTML(node){
+
+if(node===null) return "";
+
+return `
+<li>
+<div class="node">${node.data}</div>
+
+${
+(node.left || node.right)
+?
+`
+<ul>
+${createTreeHTML(node.left)}
+${createTreeHTML(node.right)}
+</ul>
+`
+:
+''
+}
+
+</li>
+`;
+}
+
+function renderTree(){
+
+document.getElementById("treeArea").innerHTML=
+`
+<ul>
+${createTreeHTML(root)}
+</ul>
+`;
+
+}
+
+async function searchNode(){
+
+let value=
+Number(document.getElementById("value").value);
+
+let nodes=
+document.querySelectorAll(".node");
+
+for(let node of nodes){
+
+node.classList.add("highlight");
+
+await new Promise(r=>setTimeout(r,500));
+
+if(Number(node.innerText)===value){
+return;
+}
+
+node.classList.remove("highlight");
+}
+}
+
+async function levelOrder(){
+
+if(root===null) return;
+
+let visualNodes=
+document.querySelectorAll(".node");
+
+for(let node of visualNodes){
+
+node.classList.add("highlight");
+
+await new Promise(r=>setTimeout(r,500));
+
+node.classList.remove("highlight");
+
+}
+}
+
+</script>
+
+</body>
+</html>

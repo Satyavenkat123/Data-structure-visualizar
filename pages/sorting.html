@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sorting Visualizer Pro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+
+<style>
+
+/* ===== GLOBAL ===== */
+body{
+margin:0;
+font-family:'Orbitron',sans-serif;
+background:#0f172a;
+overflow:hidden;
+color:white;
+text-align:center;
+}
+
+/* glowing background */
+body::before{
+content:"";
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:
+radial-gradient(circle at 20% 20%, cyan, transparent 25%),
+radial-gradient(circle at 80% 30%, violet, transparent 25%),
+radial-gradient(circle at 40% 80%, blue, transparent 25%);
+filter:blur(80px);
+opacity:0.5;
+animation:bg 8s infinite alternate;
+z-index:-1;
+}
+
+@keyframes bg{
+0%{transform:scale(1);}
+100%{transform:scale(1.3);}
+}
+
+/* TITLE */
+h1{
+margin-top:15px;
+text-shadow:0 0 20px cyan;
+}
+
+/* INPUT */
+input{
+padding:10px;
+border:none;
+border-radius:8px;
+margin:5px;
+}
+
+/* BUTTONS */
+button{
+padding:10px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+background:cyan;
+font-weight:bold;
+transition:0.3s;
+}
+
+button:hover{
+transform:scale(1.1);
+box-shadow:0 0 15px cyan;
+}
+
+/* CONTAINER */
+.container{
+display:flex;
+justify-content:center;
+align-items:flex-end;
+gap:8px;
+height:60vh;
+margin-top:40px;
+perspective:1200px;
+}
+
+/* BAR STYLE */
+.bar{
+width:35px;
+background:linear-gradient(180deg,#00ffff,#0066ff);
+border-radius:6px;
+
+display:flex;
+align-items:flex-end;
+justify-content:center;
+
+font-size:12px;
+color:black;
+font-weight:bold;
+
+box-shadow:0 0 15px cyan;
+
+transition:0.4s;
+transform-style:preserve-3d;
+}
+
+/* ACTIVE COMPARISON */
+.active{
+background:yellow !important;
+transform:scale(1.2) rotateX(20deg);
+}
+
+/* SWAP EFFECT */
+.swap{
+background:red !important;
+transform:scale(1.3) rotateY(180deg);
+}
+
+/* PARTICLES */
+canvas{
+position:fixed;
+top:0;
+left:0;
+z-index:-2;
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="particles"></canvas>
+
+<h1>SORTING VISUALIZER (PRO LEVEL)</h1>
+
+<input id="input" placeholder="Enter numbers (comma separated)">
+
+<button onclick="create()">Create</button>
+<button onclick="bubbleSort()">Bubble Sort</button>
+<button onclick="selectionSort()">Selection Sort</button>
+<button onclick="insertionSort()">Insertion Sort</button>
+
+<div class="container" id="box"></div>
+
+<script>
+
+let arr=[];
+
+/* ===== CREATE ARRAY ===== */
+function create(){
+let input=document.getElementById("input").value;
+arr=input.split(",").map(Number);
+render();
+}
+
+/* ===== RENDER ===== */
+function render(){
+let box=document.getElementById("box");
+box.innerHTML="";
+
+arr.forEach(v=>{
+let div=document.createElement("div");
+div.className="bar";
+div.style.height=v*4+"px";
+div.innerHTML=v;
+box.appendChild(div);
+});
+}
+
+/* ===== DELAY ===== */
+function delay(ms){
+return new Promise(r=>setTimeout(r,ms));
+}
+
+/* ===== BUBBLE SORT ===== */
+async function bubbleSort(){
+
+let bars=document.querySelectorAll(".bar");
+
+for(let i=0;i<arr.length;i++){
+
+for(let j=0;j<arr.length-i-1;j++){
+
+bars=document.querySelectorAll(".bar");
+
+bars[j].classList.add("active");
+bars[j+1].classList.add("active");
+
+await delay(400);
+
+if(arr[j]>arr[j+1]){
+
+/* swap */
+[ arr[j], arr[j+1] ] = [ arr[j+1], arr[j] ];
+
+render();
+}
+
+bars[j].classList.remove("active");
+bars[j+1].classList.remove("active");
+}
+
+}
+}
+
+/* ===== SELECTION SORT ===== */
+async function selectionSort(){
+
+for(let i=0;i<arr.length;i++){
+
+let min=i;
+
+for(let j=i+1;j<arr.length;j++){
+
+let bars=document.querySelectorAll(".bar");
+
+bars[j].classList.add("active");
+
+await delay(300);
+
+if(arr[j]<arr[min]){
+min=j;
+}
+
+bars[j].classList.remove("active");
+}
+
+if(min!==i){
+[arr[i],arr[min]]=[arr[min],arr[i]];
+render();
+await delay(300);
+}
+
+}
+
+}
+
+/* ===== INSERTION SORT ===== */
+async function insertionSort(){
+
+for(let i=1;i<arr.length;i++){
+
+let key=arr[i];
+let j=i-1;
+
+while(j>=0 && arr[j]>key){
+
+arr[j+1]=arr[j];
+j--;
+
+render();
+await delay(300);
+}
+
+arr[j+1]=key;
+render();
+await delay(300);
+}
+
+}
+
+/* ===== PARTICLES ===== */
+const canvas=document.getElementById("particles");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let particles=[];
+
+for(let i=0;i<70;i++){
+particles.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+r:Math.random()*2,
+dx:(Math.random()-0.5)*1,
+dy:(Math.random()-0.5)*1
+});
+}
+
+function animate(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+particles.forEach(p=>{
+p.x+=p.dx;
+p.y+=p.dy;
+
+if(p.x<0||p.x>canvas.width)p.dx*=-1;
+if(p.y<0||p.y>canvas.height)p.dy*=-1;
+
+ctx.beginPath();
+ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+ctx.fillStyle="cyan";
+ctx.fill();
+});
+
+requestAnimationFrame(animate);
+}
+
+animate();
+
+</script>
+
+</body>
+</html>

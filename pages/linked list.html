@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linked List Visualizer</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Orbitron',sans-serif;
+}
+
+body{
+height:100vh;
+overflow:hidden;
+background:linear-gradient(-45deg,#020617,#0f172a,#1e1b4b,#0c4a6e);
+background-size:400% 400%;
+animation:bgMove 12s ease infinite;
+color:white;
+}
+
+@keyframes bgMove{
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
+}
+
+.container{
+padding:20px;
+text-align:center;
+}
+
+h1{
+font-size:3rem;
+margin-bottom:20px;
+text-shadow:0 0 15px cyan;
+}
+
+.controls{
+margin-bottom:30px;
+}
+
+input{
+padding:12px;
+border:none;
+border-radius:10px;
+outline:none;
+width:180px;
+}
+
+button{
+padding:12px 18px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+margin:5px;
+background:cyan;
+font-weight:bold;
+transition:.3s;
+}
+
+button:hover{
+transform:scale(1.08);
+box-shadow:0 0 15px cyan;
+}
+
+.list-area{
+display:flex;
+justify-content:center;
+align-items:center;
+flex-wrap:wrap;
+padding:40px;
+min-height:300px;
+}
+
+/* NODE */
+
+.node{
+width:90px;
+height:90px;
+border-radius:15px;
+
+background:rgba(255,255,255,.1);
+backdrop-filter:blur(15px);
+
+border:1px solid rgba(255,255,255,.2);
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+font-size:22px;
+font-weight:bold;
+
+position:relative;
+
+transform-style:preserve-3d;
+
+animation:nodeEnter .8s ease forwards;
+}
+
+@keyframes nodeEnter{
+
+0%{
+opacity:0;
+transform:
+translateY(-200px)
+rotateY(360deg)
+scale(.2);
+}
+
+100%{
+opacity:1;
+transform:
+translateY(0)
+rotateY(0)
+scale(1);
+}
+}
+
+.node.highlight{
+background:yellow;
+color:black;
+transform:scale(1.2);
+box-shadow:0 0 20px yellow;
+}
+
+.arrow{
+font-size:40px;
+margin:0 15px;
+color:cyan;
+animation:arrowGlow 1s infinite alternate;
+}
+
+@keyframes arrowGlow{
+from{
+opacity:.5;
+}
+to{
+opacity:1;
+text-shadow:0 0 15px cyan;
+}
+}
+
+.deleteAnim{
+animation:deleteNode .8s forwards;
+}
+
+@keyframes deleteNode{
+
+100%{
+opacity:0;
+transform:
+translateY(150px)
+rotateY(720deg)
+scale(0);
+}
+}
+
+.footer{
+position:absolute;
+bottom:15px;
+width:100%;
+text-align:center;
+opacity:.7;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>LINKED LIST VISUALIZER</h1>
+
+<div class="controls">
+
+<input id="value" placeholder="Enter Value">
+
+<button onclick="insertBegin()">
+Insert Begin
+</button>
+
+<button onclick="insertEnd()">
+Insert End
+</button>
+
+<button onclick="deleteBegin()">
+Delete Begin
+</button>
+
+<button onclick="deleteEnd()">
+Delete End
+</button>
+
+<button onclick="traverse()">
+Traverse
+</button>
+
+</div>
+
+<div class="list-area" id="listArea"></div>
+
+</div>
+
+<div class="footer">
+Advanced Linked List Visualizer
+</div>
+
+<script>
+
+let linkedList=[];
+
+function render(){
+
+const area=document.getElementById("listArea");
+
+area.innerHTML="";
+
+linkedList.forEach((item,index)=>{
+
+const node=document.createElement("div");
+
+node.className="node";
+node.innerText=item;
+
+area.appendChild(node);
+
+if(index<linkedList.length-1){
+
+const arrow=document.createElement("div");
+
+arrow.className="arrow";
+arrow.innerHTML="➜";
+
+area.appendChild(arrow);
+
+}
+
+});
+
+}
+
+function insertBegin(){
+
+const value=document.getElementById("value").value;
+
+if(value==="") return;
+
+linkedList.unshift(value);
+
+render();
+
+}
+
+function insertEnd(){
+
+const value=document.getElementById("value").value;
+
+if(value==="") return;
+
+linkedList.push(value);
+
+render();
+
+}
+
+function deleteBegin(){
+
+const nodes=document.querySelectorAll(".node");
+
+if(nodes.length===0) return;
+
+nodes[0].classList.add("deleteAnim");
+
+setTimeout(()=>{
+
+linkedList.shift();
+
+render();
+
+},800);
+
+}
+
+function deleteEnd(){
+
+const nodes=document.querySelectorAll(".node");
+
+if(nodes.length===0) return;
+
+nodes[nodes.length-1].classList.add("deleteAnim");
+
+setTimeout(()=>{
+
+linkedList.pop();
+
+render();
+
+},800);
+
+}
+
+async function traverse(){
+
+const nodes=document.querySelectorAll(".node");
+
+for(let i=0;i<nodes.length;i++){
+
+nodes[i].classList.add("highlight");
+
+await new Promise(resolve=>
+setTimeout(resolve,700)
+);
+
+nodes[i].classList.remove("highlight");
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
